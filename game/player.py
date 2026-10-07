@@ -19,34 +19,56 @@ class Player:
         if keys[pygame.K_UP] or keys[pygame.K_w]: dy = -SPEED
         if keys[pygame.K_DOWN] or keys[pygame.K_s]: dy = SPEED
 
-        # Wall-aware movement (check cell boundaries)
+        # Wall-aware movement
         new_rect = self.rect.move(dx, 0)
         if not self._hits_wall(new_rect, walls, rows, cols):
             self.rect = new_rect
+
         new_rect = self.rect.move(0, dy)
         if not self._hits_wall(new_rect, walls, rows, cols):
             self.rect = new_rect
 
     def _hits_wall(self, rect, walls, rows, cols):
-        # Check the player's occupied cells and the maze walls between them
+        # Prevent the player from leaving the maze.
+        if rect.left < 0 or rect.top < 0:
+            return True
+        if rect.right > cols * CELL or rect.bottom > rows * CELL:
+            return True
+
+        # Only check cells touched by the player's rectangle.
         left = rect.left // CELL
         right = (rect.right - 1) // CELL
         top = rect.top // CELL
         bottom = (rect.bottom - 1) // CELL
 
-        if top < 0 or bottom >= rows or left < 0 or right >= cols:
-            return True
-
         for r in range(top, bottom + 1):
             for c in range(left, right + 1):
-                if c < right and walls[r][c][2]:  # East wall
-                    return True
-                if c > left and walls[r][c][3]:   # West wall
-                    return True
-                if r < bottom and walls[r][c][1]: # South wall
-                    return True
-                if r > top and walls[r][c][0]:    # North wall
-                    return True
+                x = c * CELL
+                y = r * CELL
+
+                # North wall
+                if walls[r][c][0]:
+                    wall = pygame.Rect(x, y, CELL, 3)
+                    if rect.colliderect(wall):
+                        return True
+
+                # South wall
+                if walls[r][c][1]:
+                    wall = pygame.Rect(x, y + CELL - 3, CELL, 3)
+                    if rect.colliderect(wall):
+                        return True
+
+                # East wall
+                if walls[r][c][2]:
+                    wall = pygame.Rect(x + CELL - 3, y, 3, CELL)
+                    if rect.colliderect(wall):
+                        return True
+
+                # West wall
+                if walls[r][c][3]:
+                    wall = pygame.Rect(x, y, 3, CELL)
+                    if rect.colliderect(wall):
+                        return True
 
         return False
 
