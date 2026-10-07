@@ -28,12 +28,26 @@ class Player:
             self.rect = new_rect
 
     def _hits_wall(self, rect, walls, rows, cols):
-        # Check corners of player rect against wall segments
-        for px, py in [(rect.left, rect.top),(rect.right-1,rect.top),(rect.left,rect.bottom-1),(rect.right-1,rect.bottom-1)]:
-            cr = py // CELL
-            cc = px // CELL
-            if cr < 0 or cr >= rows or cc < 0 or cc >= cols:
-                return True
+        # Check the player's occupied cells and the maze walls between them
+        left = rect.left // CELL
+        right = (rect.right - 1) // CELL
+        top = rect.top // CELL
+        bottom = (rect.bottom - 1) // CELL
+
+        if top < 0 or bottom >= rows or left < 0 or right >= cols:
+            return True
+
+        for r in range(top, bottom + 1):
+            for c in range(left, right + 1):
+                if c < right and walls[r][c][2]:  # East wall
+                    return True
+                if c > left and walls[r][c][3]:   # West wall
+                    return True
+                if r < bottom and walls[r][c][1]: # South wall
+                    return True
+                if r > top and walls[r][c][0]:    # North wall
+                    return True
+
         return False
 
     def draw(self, screen):
