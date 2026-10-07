@@ -1,3 +1,4 @@
+#edited code
 import pygame
 from game.maze import CELL
 
